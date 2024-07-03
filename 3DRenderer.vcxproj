@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>D:\VS\3DRenderer\SDL2-2.30.4\include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>D:\VS\3DRenderer\SDL2-2.30.4\lib\x64;$(LibraryPath)</LibraryPath>
+    <ExternalIncludePath>$(ProjectDir)\SDL2-2.30.4\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>$(ProjectDir)\SDL2-2.30.4\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\VS\3DRenderer\SDL2-2.30.4\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\SDL2-2.30.4\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
