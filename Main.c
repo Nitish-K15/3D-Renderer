@@ -3,8 +3,20 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include "display.h"
+#include "vector.h"
+#define N_POINTS (9 * 9 * 9)
+
+
+vec3_t cube_points[N_POINTS];
+
+vec2_t projected_points[N_POINTS];
+
 
 bool is_running = false;
+
+float fov_factor = 640;
+
+vec3_t camera_position = { 0,0,-5 };
 
 void setup(void)
 {
@@ -14,7 +26,15 @@ void setup(void)
 	//Creating an SDL texture that is used to display the color buffer
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
 
+	int point_count = 0;
 
+	for (float x = -1; x <= 1; x += 0.25)
+		for (float y = -1; y <= 1; y += 0.25)
+			for (float z = -1; z <= 1; z += 0.25)
+			{
+				vec3_t new_point = { x,y,z };
+				cube_points[point_count++] = new_point;
+			}
 }
 
 void process_input(void)
@@ -34,20 +54,49 @@ void process_input(void)
 	}
 }
 
+//Recieves 3d point and returns a 2d one
+vec2_t project(vec3_t point)
+{
+	vec2_t projected_point = {
+		.x = (fov_factor * point.x) / point.z,
+		.y = (fov_factor * point.y) / point.z
+	};
+	return projected_point;
+}
+
 void update(void)
 {
+	for (int i = 0; i < N_POINTS; i++)
+	{
+		vec3_t point = cube_points[i];
 
+		//move point away from camera
+		point.z -= camera_position.z;
+
+		//Project the current point
+		vec2_t projected_point = project(point);
+
+		//Save the projected 2d vector in array of projected points
+		projected_points[i] = projected_point;
+	}
 }
 
 
 void render(void)
 {
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderClear(renderer);
+	//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	//SDL_RenderClear(renderer);
 
 	draw_grid();
 
-	draw_rect(50, 50, 40, 100, 0xFFFF0000);
+	//draw_pixel(10, 10, 0xFFFFFF00);
+	//draw_rect(50, 50, 40, 100, 0xFFFF0000);
+	for (int i = 0; i < N_POINTS; i++)
+	{
+		vec2_t projected_point = projected_points[i];
+		draw_rect(projected_point.x + window_height / 2, projected_point.y + window_width / 2, 4, 4, 0xFFFFFF00);
+	}
+
 	render_color_buffer();
 	clear_color_buffer(0xFF000000);
 

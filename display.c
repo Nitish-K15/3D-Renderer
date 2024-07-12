@@ -69,6 +69,12 @@ void draw_grid(void)
 	}
 }
 
+void draw_pixel(int x, int y, uint32_t color)
+{
+	if (x >= 0 && x < window_width && y >= 0 && y < window_height)
+		color_buffer[(window_width * y) + x] = color;
+}
+
 void render_color_buffer(void)
 {
 	SDL_UpdateTexture(color_buffer_texture, NULL, color_buffer, (int)(window_width * sizeof(uint32_t)));
@@ -80,7 +86,8 @@ void draw_rect(int x, int y, int height, int width, uint32_t color)
 	for (int i = y; i < y + height; i++)
 		for (int j = x; j < x + width; j++)
 		{
-			color_buffer[(window_width * i) + j] = color;
+			draw_pixel(i, j, color);
+			//color_buffer[(window_width * i) + j] = color;
 		}
 }
 
