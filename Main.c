@@ -76,7 +76,7 @@ void update(void)
 	{
 		vec3_t point = cube_points[i];
 
-		vec3_t transformed_point = vec3_rotate_y(point, cube_rotation.y);
+		vec3_t transformed_point = vec3_rotate_x(point, cube_rotation.x);
 		transformed_point = vec3_rotate_y(transformed_point, cube_rotation.y);
 		transformed_point = vec3_rotate_z(transformed_point, cube_rotation.z);
 
