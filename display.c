@@ -83,8 +83,8 @@ void render_color_buffer(void)
 
 void draw_rect(int x, int y, int height, int width, uint32_t color)
 {
-	for (int i = y; i < y + height; i++)
-		for (int j = x; j < x + width; j++)
+	for (int i = x; i < x + width; i++)
+		for (int j = y; j < y + height; j++)
 		{
 			draw_pixel(i, j, color);
 			//color_buffer[(window_width * i) + j] = color;
