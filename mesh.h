@@ -14,6 +14,8 @@ extern face_t cube_faces[N_CUBE_FACES];
 
 void load_cube_mesh_data(void);
 
+void load_obj_file_data(char* filepath);
+
 typedef struct {
 	vec3_t* vertices; //dynamic array for vertices
 	face_t* faces; //dynamic array for faces
