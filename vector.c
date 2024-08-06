@@ -30,6 +30,13 @@ vec2_t vec2_div(vec2_t u, float factor)
 	return result;
 }
 
+void vec2_normalize(vec2_t* v)
+{
+	float length = vec2_length(*v);
+	v->x /= length;
+	v->y /= length;
+}
+
 float vec2_dot(vec2_t a, vec2_t b)
 {
 	float result = a.x * b.x + a.y * b.y;
@@ -73,6 +80,14 @@ vec3_t vec3_cross(vec3_t a, vec3_t b)
 						.z = a.x * b.y - a.y * b.x
 	};
 	return result;
+}
+
+void vec3_normalize(vec3_t* v)
+{
+	float length = vec3_length(*v);
+	v->x /= length;
+	v->y /= length;
+	v->z /= length;
 }
 
 float vec3_dot(vec3_t a, vec3_t b)

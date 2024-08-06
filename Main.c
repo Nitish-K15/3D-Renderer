@@ -122,6 +122,8 @@ void update(void)
 
 		//Compute face normal
 		vec3_t normal = vec3_cross(vector_ab, vector_ac);
+		vec3_normalize(&normal);
+		//Normalize the normal vector
 
 		vec3_t camera_ray = vec3_sub(camera_position, vector_a); //from point to camera
 
