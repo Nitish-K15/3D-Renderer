@@ -6,6 +6,7 @@
 #include "vector.h"
 #include "triangle.h"
 #include "mesh.h"
+#include "matrix.h"
 #include "array.h"
 
 //vec3_t cube_points[N_POINTS];
@@ -92,9 +93,20 @@ void update(void)
 	//Initialize array of triangles to render
 	triangles_to_render = NULL;
 
-	mesh.rotation.x += 0.01;
+	// Change the mesh scale, rotation, and translation values per animation frame
+	  // mesh.rotation.x += 0.01;
 	mesh.rotation.y += 0.01;
-	mesh.rotation.z += 0.01;
+	// mesh.rotation.z += 0.01;
+	// mesh.scale.x += 0.002;
+	// mesh.scale.y += 0.001;
+	// mesh.translation.x += 0.01;
+	mesh.translation.z = 5.0;
+
+	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+	mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
+	mat4_t rotation_matrix_x = mat4_make_rotation_x(mesh.rotation.x);
+	mat4_t rotation_matrix_y = mat4_make_rotation_y(mesh.rotation.y);
+	mat4_t rotation_matrix_z = mat4_make_rotation_z(mesh.rotation.z);
 
 	//Loop all triangle faces of our mesh
 	int num_faces = array_length(mesh.faces);
@@ -109,29 +121,34 @@ void update(void)
 		face_vertices[1] = mesh.vertices[mesh_face.b - 1];
 		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-		vec3_t transformed_vertices[3];
+		vec4_t transformed_vertices[3];
 
 		//Loop all three vertices of this current face and apply transformations
 		for (int j = 0; j < 3; j++)
 		{
-			vec3_t transformed_vertex = face_vertices[j];
+			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-			transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
-			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
-			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+			transformed_vertex = mat4_mul_vec4(scale_matrix, transformed_vertex);
+			transformed_vertex = mat4_mul_vec4(rotation_matrix_x, transformed_vertex);
+			transformed_vertex = mat4_mul_vec4(rotation_matrix_y, transformed_vertex);
+			transformed_vertex = mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
+			transformed_vertex = mat4_mul_vec4(translation_matrix, transformed_vertex);
 
 			//Translate the vertex away from camera in Z
-			transformed_vertex.z += 5;
+			//transformed_vertex.z += 5;
 
 			transformed_vertices[j] = transformed_vertex;
 		}
 
+		//Calculate average depth of each face
+		float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
+
 		if (cull_method == CULL_BACKFACE)
 		{
 			//Check backface culling
-			vec3_t vector_a = transformed_vertices[0];
-			vec3_t vector_b = transformed_vertices[1];
-			vec3_t vector_c = transformed_vertices[2];
+			vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+			vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+			vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
 
 			//Get vector b-a and c-a
 			vec3_t vector_ab = vec3_sub(vector_b, vector_a);
@@ -158,7 +175,7 @@ void update(void)
 		for (int j = 0; j < 3; j++)
 		{
 			//Project the current vertex
-			projected_points[j] = project(transformed_vertices[j]);
+			projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
 
 			//Scale and translate projected point to the middle of the screen
 			projected_points[j].x += window_width / 2;
@@ -171,7 +188,8 @@ void update(void)
 				{ projected_points[1].x,projected_points[1].y },
 				{projected_points[2].x,projected_points[2].y},
 				},
-			.color = mesh_face.color
+			.color = mesh_face.color,
+			.avg_depth = avg_depth
 		};
 
 
@@ -179,6 +197,18 @@ void update(void)
 		//triangles_to_render[i] = projected_triangle;
 		array_push(triangles_to_render, projected_triangle);
 	}
+
+	int num_of_triangles = array_length(triangles_to_render);
+	for (int i = 0; i < num_of_triangles; i++)
+		for (int j = i; j < num_of_triangles; j++)
+		{
+			if (triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth)
+			{
+				triangle_t temp = triangles_to_render[i];
+				triangles_to_render[i] = triangles_to_render[j];
+				triangles_to_render[j] = temp;
+			}
+		}
 
 
 	/*for (int i = 0; i < N_POINTS; i++)
