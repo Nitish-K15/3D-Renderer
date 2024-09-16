@@ -84,6 +84,17 @@ mat4_t mat4_make_rotation_z(float angle) {
 	return m;
 }
 
+mat4_t mat4_mul_mat4(mat4_t m1, mat4_t m2)
+{
+	mat4_t m;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			m.m[i][j] = m1.m[i][0] * m2.m[0][j] + m1.m[i][1] * m2.m[1][j] + m1.m[i][2] * m2.m[2][j] + m1.m[i][3] * m2.m[3][j];
+		}
+	}
+	return m;
+}
+
 vec4_t mat4_mul_vec4(mat4_t m, vec4_t v) {
 	vec4_t result;
 	result.x = m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2] * v.z + m.m[0][3] * v.w;
