@@ -19,9 +19,10 @@ triangle_t* triangles_to_render = NULL;
 bool is_running = false;
 int previous_frame_time = 0;
 
-float fov_factor = 512;
-
 vec3_t camera_position = { 0,0,0 };
+
+mat4_t proj_matrix;
+
 
 void setup(void)
 {
@@ -34,9 +35,15 @@ void setup(void)
 	//Creating an SDL texture that is used to display the color buffer
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
 
+	//Initialize projection matrix
+	float fov = M_PI / 3.0; //same as 180/3 or 60deg
+	float aspect = (float)window_height / (float)window_width;
+	float znear = 0.1;
+	float zfar = 100.0;
+	proj_matrix = mat4t_make_perspective(fov, aspect, znear, zfar);
 
-	load_cube_mesh_data();
-	//load_obj_file_data("D:/VS/3DRenderer/assets/cube.obj");
+	//load_cube_mesh_data();
+	load_obj_file_data("D:/VS/3DRenderer/assets/f22.obj");
 }
 
 void process_input(void)
@@ -68,15 +75,7 @@ void process_input(void)
 	}
 }
 
-//Recieves 3d point and returns a 2d one
-vec2_t project(vec3_t point)
-{
-	vec2_t projected_point = {
-		.x = (fov_factor * point.x) / point.z,
-		.y = (fov_factor * point.y) / point.z
-	};
-	return projected_point;
-}
+
 
 void update(void)
 {
@@ -172,17 +171,23 @@ void update(void)
 		}
 
 
-		vec2_t projected_points[3];
+		vec4_t projected_points[3];
 
 		//Project the vertices
 		for (int j = 0; j < 3; j++)
 		{
 			//Project the current vertex
-			projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+			projected_points[j] = mat4_mul_vec4_projection(proj_matrix, transformed_vertices[j]);
+
+
+			//Scale into view
+			projected_points[j].x *= window_width / 2.0;
+			projected_points[j].y *= window_height / 2.0;
 
 			//Scale and translate projected point to the middle of the screen
-			projected_points[j].x += window_width / 2;
-			projected_points[j].y += window_height / 2;
+			projected_points[j].x += window_width / 2.0;
+			projected_points[j].y += window_height / 2.0;
+
 		}
 
 		triangle_t projected_triangle = {
