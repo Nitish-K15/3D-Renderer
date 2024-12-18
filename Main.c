@@ -7,6 +7,7 @@
 #include "triangle.h"
 #include "mesh.h"
 #include "matrix.h"
+#include "light.h"
 #include "array.h"
 
 //vec3_t cube_points[N_POINTS];
@@ -42,8 +43,8 @@ void setup(void)
 	float zfar = 100.0;
 	proj_matrix = mat4t_make_perspective(fov, aspect, znear, zfar);
 
-	//load_cube_mesh_data();
-	load_obj_file_data("D:/VS/3DRenderer/assets/f22.obj");
+	load_cube_mesh_data();
+	//load_obj_file_data("D:/VS/3DRenderer/assets/f22.obj");
 }
 
 void process_input(void)
@@ -145,23 +146,23 @@ void update(void)
 		//Calculate average depth of each face
 		float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
 
+		//Check backface culling
+		vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+		vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+		vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
+
+		//Get vector b-a and c-a
+		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+
+		//Compute face normal
+		vec3_t normal = vec3_cross(vector_ab, vector_ac);
+		//Normalize the normal vector
+		vec3_normalize(&normal);
+
+		vec3_t camera_ray = vec3_sub(camera_position, vector_a); //from point to camera
 		if (cull_method == CULL_BACKFACE)
 		{
-			//Check backface culling
-			vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
-			vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
-			vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
-
-			//Get vector b-a and c-a
-			vec3_t vector_ab = vec3_sub(vector_b, vector_a);
-			vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-
-			//Compute face normal
-			vec3_t normal = vec3_cross(vector_ab, vector_ac);
-			vec3_normalize(&normal);
-			//Normalize the normal vector
-
-			vec3_t camera_ray = vec3_sub(camera_position, vector_a); //from point to camera
 
 			//Bypass the triangles that are looking away from the camera
 			if (vec3_dot(normal, camera_ray) < 0)
@@ -190,13 +191,19 @@ void update(void)
 
 		}
 
+		//Calculate shade intensity of light
+		float light_intensity = -vec3_dot(normal, light.direction);
+
+		//Calculate triangle color
+		uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity);
+
 		triangle_t projected_triangle = {
 			.points = {
 				{projected_points[0].x,projected_points[0].y},
 				{ projected_points[1].x,projected_points[1].y },
 				{projected_points[2].x,projected_points[2].y},
 				},
-			.color = mesh_face.color,
+			.color = triangle_color,
 			.avg_depth = avg_depth
 		};
 
