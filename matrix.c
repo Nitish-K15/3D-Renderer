@@ -121,9 +121,9 @@ vec4_t mat4_mul_vec4_projection(mat4_t proj_mat, vec4_t v)
 
 	if (result.w != 0.0)
 	{
-		result.x /= -result.w;
-		result.y /= -result.w;
-		result.z /= -result.w;
+		result.x /= result.w;
+		result.y /= result.w;
+		result.z /= result.w;
 	}
 	return result;
 }
