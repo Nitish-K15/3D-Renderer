@@ -4,6 +4,7 @@
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 uint32_t* color_buffer = NULL;
+float* z_buffer = NULL;
 SDL_Texture* color_buffer_texture = NULL;
 int window_width = 800;
 int window_height = 600;
@@ -46,12 +47,6 @@ bool InitializeWindow(void)
 	return true;
 }
 
-void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
-{
-	draw_line(x0, y0, x1, y1, color);
-	draw_line(x1, y1, x2, y2, color);
-	draw_line(x2, y2, x0, y0, color);
-}
 
 void clear_color_buffer(uint32_t color)
 {
@@ -60,6 +55,17 @@ void clear_color_buffer(uint32_t color)
 		for (int x = 0; x < window_width; x++)
 		{
 			color_buffer[(window_width * y) + x] = color;
+		}
+	}
+}
+
+void clear_z_buffer(void)
+{
+	for (int y = 0; y < window_height; y++)
+	{
+		for (int x = 0; x < window_width; x++)
+		{
+			z_buffer[(window_width * y) + x] = 1;
 		}
 	}
 }

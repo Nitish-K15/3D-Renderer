@@ -34,6 +34,8 @@ void setup(void)
 	//Allocate the required memory in bytes to hold the color buffer
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
 
+	z_buffer = (float*)malloc(sizeof(float) * window_width * window_height);
+
 	//Creating an SDL texture that is used to display the color buffer
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
 
@@ -102,8 +104,8 @@ void update(void)
 	triangles_to_render = NULL;
 
 	// Change the mesh scale, rotation, and translation values per animation frame
-	//mesh.rotation.x += 0.01;
-	mesh.rotation.y += 0.01;
+	mesh.rotation.x += 0.01;
+	//mesh.rotation.y += 0.01;
 	// mesh.rotation.z += 0.01;
 	// mesh.scale.x += 0.002;
 	// mesh.scale.y += 0.001;
@@ -220,7 +222,6 @@ void update(void)
 					{mesh_face.c_uv.u,mesh_face.c_uv.v}
 				},
 			.color = triangle_color,
-			.avg_depth = avg_depth
 		};
 
 
@@ -230,16 +231,7 @@ void update(void)
 	}
 
 	int num_of_triangles = array_length(triangles_to_render);
-	for (int i = 0; i < num_of_triangles; i++)
-		for (int j = i; j < num_of_triangles; j++)
-		{
-			if (triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth)
-			{
-				triangle_t temp = triangles_to_render[i];
-				triangles_to_render[i] = triangles_to_render[j];
-				triangles_to_render[j] = temp;
-			}
-		}
+
 
 
 	/*for (int i = 0; i < N_POINTS; i++)
@@ -278,7 +270,7 @@ void render(void)
 			draw_rect(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFFFF00);
 			draw_rect(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFFFF00);*/
 		if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
-			draw_filled_triangle(triangle.points[0].x, triangle.points[0].y, triangle.points[1].x, triangle.points[1].y, triangle.points[2].x, triangle.points[2].y, triangle.color);
+			draw_filled_triangle(triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w, triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w, triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w, triangle.color);
 
 		if (render_method == RENDERED_TEXTURED_WIRE || render_method == RENDER_TEXTURED)
 			draw_textured_triangle(
@@ -314,6 +306,7 @@ void render(void)
 
 	render_color_buffer();
 	clear_color_buffer(0xFF000000);
+	clear_z_buffer();
 
 	SDL_RenderPresent(renderer);
 }
@@ -321,6 +314,7 @@ void render(void)
 void free_resources(void)
 {
 	free(color_buffer);
+	free(z_buffer);
 	array_free(mesh.faces);
 	array_free(mesh.vertices);
 
