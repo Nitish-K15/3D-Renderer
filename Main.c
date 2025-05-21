@@ -14,8 +14,10 @@
 //vec3_t cube_points[N_POINTS];
 
 //vec2_t projected_points[N_POINTS];
+#define MAX_TRIANGLES_PER_MESH 10000
+triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
 
-triangle_t* triangles_to_render = NULL;
+int num_triangles_to_render = 0;
 
 
 bool is_running = false;
@@ -101,7 +103,7 @@ void update(void)
 	previous_frame_time = SDL_GetTicks();
 
 	//Initialize array of triangles to render
-	triangles_to_render = NULL;
+	num_triangles_to_render = 0;
 
 	// Change the mesh scale, rotation, and translation values per animation frame
 	mesh.rotation.x += 0.01;
@@ -227,10 +229,14 @@ void update(void)
 
 		//Save the projected triangle in the array of triangles to render
 		//triangles_to_render[i] = projected_triangle;
-		array_push(triangles_to_render, projected_triangle);
+		if (num_triangles_to_render < MAX_TRIANGLES_PER_MESH)
+		{
+			triangles_to_render[num_triangles_to_render] = projected_triangle;
+			num_triangles_to_render++;
+		}
 	}
 
-	int num_of_triangles = array_length(triangles_to_render);
+	//int num_of_triangles = array_length(triangles_to_render);
 
 
 
@@ -261,9 +267,9 @@ void render(void)
 
 	draw_grid();
 
-	int num_triangles = array_length(triangles_to_render);
+	//int num_triangles = array_length(triangles_to_render);
 
-	for (int i = 0; i < num_triangles; i++)
+	for (int i = 0; i < num_triangles_to_render; i++)
 	{
 		triangle_t triangle = triangles_to_render[i];
 		/*	draw_rect(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFFFF00);
@@ -301,7 +307,7 @@ void render(void)
 
 
 	//Clear the array of triangles to render every frame loop
-	array_free(triangles_to_render);
+	//array_free(triangles_to_render);
 
 
 	render_color_buffer();
