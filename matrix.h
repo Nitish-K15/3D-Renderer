@@ -17,4 +17,5 @@ mat4_t mat4_mul_mat4(mat4_t m1, mat4_t m2);
 vec4_t mat4_mul_vec4(mat4_t m, vec4_t v);
 mat4_t mat4t_make_perspective(float fov, float aspect, float znear, float zfar);
 vec4_t mat4_mul_vec4_projection(mat4_t proj_mat, vec4_t v);
+mat4_t mat4_look_at(vec3_t eye, vec3_t target, vec3_t up);
 #endif // !MATRIX_H
