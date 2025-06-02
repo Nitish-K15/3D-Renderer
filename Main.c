@@ -23,6 +23,7 @@ int num_triangles_to_render = 0;
 
 bool is_running = false;
 int previous_frame_time = 0;
+float delta_time = 0;
 
 
 mat4_t proj_matrix;
@@ -79,14 +80,29 @@ void process_input(void)
 		if (event.key.keysym.sym == SDLK_4)
 			render_method = RENDER_FILL_TRIANGLE_WIRE;
 		if (event.key.keysym.sym == SDLK_5)
-			render_method = RENDERED_TEXTURED_WIRE;
-		if (event.key.keysym.sym == SDLK_6)
 			render_method = RENDER_TEXTURED;
+		if (event.key.keysym.sym == SDLK_6)
+			render_method = RENDERED_TEXTURED_WIRE;
 		if (event.key.keysym.sym == SDLK_c)
 			cull_method = CULL_BACKFACE;
-		if (event.key.keysym.sym == SDLK_d)
+		if (event.key.keysym.sym == SDLK_x)
 			cull_method = CULL_NONE;
-		break;
+		if (event.key.keysym.sym == SDLK_UP)
+			camera.position.y += 3.0 * delta_time;
+		if (event.key.keysym.sym == SDLK_DOWN)
+			camera.position.y -= 3.0 * delta_time;
+		if (event.key.keysym.sym == SDLK_a)
+			camera.yaw -= 1.0 * delta_time;
+		if (event.key.keysym.sym == SDLK_d)
+			camera.yaw += 1.0 * delta_time;
+		if (event.key.keysym.sym == SDLK_w) {
+			camera.forward_velocity = vec3_mul(camera.direction, 5.0 * delta_time);
+			camera.position = vec3_add(camera.position, camera.forward_velocity);
+		}
+		if (event.key.keysym.sym == SDLK_s) {
+			camera.forward_velocity = vec3_mul(camera.direction, 5.0 * delta_time);
+			camera.position = vec3_sub(camera.position, camera.forward_velocity);
+		}
 	}
 }
 
@@ -101,6 +117,9 @@ void update(void)
 		SDL_Delay(time_to_wait);
 	}
 
+	//Get a delta time factor converted to seconds to be used to update gameobjects
+	delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0;
+
 	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), previous_frame_time + FRAME_TARGET_TIME));
 	previous_frame_time = SDL_GetTicks();
 
@@ -108,7 +127,7 @@ void update(void)
 	num_triangles_to_render = 0;
 
 	// Change the mesh scale, rotation, and translation values per animation frame
-	mesh.rotation.x += 0.01;
+	mesh.rotation.x += 0.01 * delta_time;
 	//mesh.rotation.y += 0.01;
 	// mesh.rotation.z += 0.01;
 	// mesh.scale.x += 0.002;
@@ -117,8 +136,11 @@ void update(void)
 	mesh.translation.z = 5.0;
 
 	//Create the view marix looking at a hardcoded target point
-	vec3_t target = { 0,0,10 };
 	vec3_t up_direction = { 0,1,0 };
+	vec3_t target = { 0,0,1 };
+	mat4_t camera_yaw_rotation = mat4_make_rotation_y(camera.yaw);
+	camera.direction = vec3_from_vec4(mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)));
+	target = vec3_add(camera.position, camera.direction);
 	view_matrix = mat4_look_at(camera.position, target, up_direction);
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
