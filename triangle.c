@@ -57,6 +57,12 @@ void draw_triangle_pixel(
 	int x, int y, uint32_t color,
 	vec4_t point_a, vec4_t point_b, vec4_t point_c
 ) {
+
+	// Add boundary check before accessing z_buffer
+	if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+		return; // Pixel is outside the window bounds
+
+	}
 	// Create three vec2 to find the interpolation
 	vec2_t p = { x, y };
 	vec2_t a = vec2_from_vec4(point_a);
@@ -94,6 +100,10 @@ void draw_triangle_texel(
 	vec4_t point_a, vec4_t point_b, vec4_t point_c,
 	tex2_t a_uv, tex2_t b_uv, tex2_t c_uv
 ) {
+	// Add boundary check before accessing z_buffer
+	if (x < 0 || x >= window_width || y < 0 || y >= window_height) {
+		return; // Pixel is outside the window bounds
+	}
 	vec2_t p = { x, y };
 	vec2_t a = vec2_from_vec4(point_a);
 	vec2_t b = vec2_from_vec4(point_b);
