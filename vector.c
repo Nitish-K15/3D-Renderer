@@ -1,6 +1,12 @@
 #include <math.h>
 #include "vector.h"
 
+vec2_t vec2_new(float x, float y)
+{
+	vec2_t result = { x,y };
+	return result;
+}
+
 float vec2_length(vec2_t v)
 {
 	return sqrt(v.x * v.x + v.y * v.y);
@@ -40,6 +46,12 @@ void vec2_normalize(vec2_t* v)
 float vec2_dot(vec2_t a, vec2_t b)
 {
 	float result = a.x * b.x + a.y * b.y;
+	return result;
+}
+
+vec3_t vec3_new(float x, float y, float z)
+{
+	vec3_t result = { x,y,z };
 	return result;
 }
 
@@ -121,6 +133,12 @@ vec3_t vec3_rotate_z(vec3_t v, float angle) {
 		.z = v.z
 	};
 	return rotated_vector;
+}
+
+vec3_t vec3_clone(vec3_t* v)
+{
+	vec3_t result = { .x = v->x,.y = v->y,.z = v->z };
+	return result;
 }
 
 vec4_t vec4_from_vec3(vec3_t v)
